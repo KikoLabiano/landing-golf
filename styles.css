@@ -172,21 +172,25 @@ p { margin: 0 0 1em; }
   position: absolute; right: 4px; top: 50%; width: 6px; height: 6px; margin-top: 1px;
   border-radius: 50%; background: var(--paper); border: 1.5px solid var(--ink);
 }
-/* la bola de repuesto, que entra rodando por la izquierda */
-.nav-toggle__ball::before {
-  content: ''; position: absolute; left: -1.5px; top: -1.5px;
+/* la bola de repuesto: cuelga del boton, no de la bola que sale
+   (si fuese hija heredaria su opacidad y su desenfoque) */
+.nav-toggle::after {
+  content: ''; position: absolute; right: 4px; top: 50%; margin-top: 1px;
   width: 6px; height: 6px; border-radius: 50%;
   background: var(--paper); border: 1.5px solid var(--ink);
-  opacity: 0;
+  opacity: 0; pointer-events: none;
 }
 .nav-toggle[aria-expanded="true"] .nav-toggle__bar:first-child { animation: swing .55s cubic-bezier(.34, 1.3, .64, 1) forwards; }
-.nav-toggle[aria-expanded="true"] .nav-toggle__bar:last-child { transform: translateY(-4px) rotate(-45deg); }
+.nav-toggle.has-toggled[aria-expanded="false"] .nav-toggle__bar:first-child { animation: swing-back .55s cubic-bezier(.34, 1.3, .64, 1) forwards; }
 /* al abrir: la bola sale hacia abajo-izquierda y entra otra por la izquierda */
 .nav-toggle[aria-expanded="true"] .nav-toggle__ball { animation: ball-out-left .45s ease-out .14s forwards; }
-.nav-toggle[aria-expanded="true"] .nav-toggle__ball::before { animation: ball-roll-in .45s ease-out .34s forwards; }
-/* al cerrar (el palo sube): la bola sale hacia arriba-derecha y entra otra */
-.nav-toggle.has-toggled[aria-expanded="false"] .nav-toggle__ball { animation: ball-out-right .5s ease-out .1s forwards; }
-.nav-toggle.has-toggled[aria-expanded="false"] .nav-toggle__ball::before { animation: ball-roll-in .45s ease-out .38s forwards; }
+.nav-toggle[aria-expanded="true"]::after { animation: ball-roll-in .45s ease-out .3s forwards; }
+/* al cerrar (el palo sube): sale la que habia entrado y vuelve a entrar otra.
+   Los papeles se invierten, asi el ciclo se repite igual golpe tras golpe.
+   Las esperas van dentro del keyframe (no como delay) para que ninguna
+   de las dos parpadee en su estado de reposo antes de arrancar. */
+.nav-toggle.has-toggled[aria-expanded="false"]::after { animation: ball-out-right .6s ease-out forwards; }
+.nav-toggle.has-toggled[aria-expanded="false"] .nav-toggle__ball { animation: ball-roll-in-late .85s ease-out forwards; }
 
 @keyframes swing {
   0%   { transform: translateY(0) rotate(0deg); }
@@ -194,15 +198,26 @@ p { margin: 0 0 1em; }
   60%  { transform: translateY(4px) rotate(58deg); }
   100% { transform: translateY(4px) rotate(45deg); }
 }
+/* sube desde abajo barriendo la bola, y vuelve a la horizontal */
+@keyframes swing-back {
+  0%   { transform: translateY(4px) rotate(45deg); }
+  18%  { transform: translateY(4px) rotate(56deg); }
+  70%  { transform: translateY(0) rotate(-14deg); }
+  100% { transform: translateY(0) rotate(0deg); }
+}
 @keyframes ball-out-left {
   0%   { transform: translate(0, 0) scale(1); opacity: 1; filter: blur(0); }
   60%  { transform: translate(-13px, 6px) scale(.85); opacity: .7; filter: blur(1px); }
   100% { transform: translate(-22px, 13px) scale(.6); opacity: 0; filter: blur(3px); }
 }
 @keyframes ball-out-right {
-  0%   { transform: translate(0, 0) scale(1); opacity: 1; filter: blur(0); }
-  55%  { transform: translate(12px, -15px) scale(.85); opacity: .7; filter: blur(1px); }
-  100% { transform: translate(24px, -7px) scale(.55); opacity: 0; filter: blur(3px); }
+  0%, 17% { transform: translate(0, 0) scale(1); opacity: 1; filter: blur(0); }
+  62%     { transform: translate(12px, -15px) scale(.85); opacity: .7; filter: blur(1px); }
+  100%    { transform: translate(24px, -7px) scale(.55); opacity: 0; filter: blur(3px); }
+}
+@keyframes ball-roll-in-late {
+  0%, 45% { transform: translateX(-18px) scale(.7); opacity: 0; }
+  100%    { transform: translateX(0) scale(1); opacity: 1; }
 }
 @keyframes ball-roll-in {
   0%   { transform: translateX(-18px) scale(.7); opacity: 0; }
@@ -210,8 +225,9 @@ p { margin: 0 0 1em; }
 }
 @media (prefers-reduced-motion: reduce) {
   .nav-toggle__bar, .nav-toggle__ball { transition: none; }
-  .nav-toggle[aria-expanded="true"] .nav-toggle__bar:first-child { animation: none; transform: translateY(4px) rotate(45deg); }
-  .nav-toggle .nav-toggle__ball, .nav-toggle .nav-toggle__ball::before { animation: none !important; }
+  .nav-toggle .nav-toggle__bar:first-child { animation: none !important; }
+  .nav-toggle[aria-expanded="true"] .nav-toggle__bar:first-child { transform: translateY(4px) rotate(45deg); }
+  .nav-toggle .nav-toggle__ball, .nav-toggle::after { animation: none !important; }
   .nav-toggle[aria-expanded="true"] .nav-toggle__ball { opacity: 0; }
 }
 
