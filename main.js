@@ -3,6 +3,7 @@
 (() => {
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 
   /* ---------- Barra superior + menú móvil ---------- */
   const topbar = $('#topbar');
@@ -11,21 +12,61 @@
   const sticky = $('#sticky-cta');
   const contact = $('#contacto');
 
-  toggle.addEventListener('click', () => {
-    const open = toggle.getAttribute('aria-expanded') === 'true';
-    toggle.setAttribute('aria-expanded', String(!open));
+  const isMenuOpen = () => toggle.getAttribute('aria-expanded') === 'true';
+  function setMenu(open, refocus) {
+    toggle.setAttribute('aria-expanded', String(open));
     toggle.classList.add('has-toggled');
-    nav.classList.toggle('is-open', !open);
+    nav.classList.toggle('is-open', open);
+    if (!open && refocus) toggle.focus();
+  }
+
+  toggle.addEventListener('click', () => setMenu(!isMenuOpen()));
+  nav.addEventListener('click', e => { if (e.target.closest('a')) setMenu(false); });
+
+  // Escape cierra y devuelve el foco al botón; Tab no se escapa del menú abierto
+  document.addEventListener('keydown', e => {
+    if (!isMenuOpen()) return;
+    if (e.key === 'Escape') { setMenu(false, true); return; }
+    if (e.key !== 'Tab') return;
+    const focusables = [toggle, ...$$('a, button', nav)];
+    const first = focusables[0], last = focusables[focusables.length - 1];
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
   });
-  nav.addEventListener('click', e => {
-    if (e.target.closest('a')) { toggle.setAttribute('aria-expanded', 'false'); toggle.classList.add('has-toggled'); nav.classList.remove('is-open'); }
+
+  // Un clic fuera también cierra
+  document.addEventListener('click', e => {
+    if (isMenuOpen() && !e.target.closest('#nav, #nav-toggle')) setMenu(false);
   });
+
+  // Al volver a escritorio el menú móvil no debe quedarse abierto
+  const wide = window.matchMedia('(min-width: 821px)');
+  (wide.addEventListener ? wide.addEventListener.bind(wide, 'change') : wide.addListener.bind(wide))(e => { if (e.matches) setMenu(false); });
+
+  const navLinks = $$('a[href^="#"]', nav).filter(a => !a.classList.contains('btn'));
+  const navTargets = navLinks.map(a => document.querySelector(a.getAttribute('href'))).filter(Boolean);
+  let currentNav = null;
+
+  function navState() {
+    // sección activa: la última cuyo inicio ya ha pasado la línea de la barra
+    const line = window.scrollY + 120;
+    let active = null;
+    navTargets.forEach((sec, i) => { if (sec.offsetTop <= line) active = navLinks[i]; });
+    if (active === currentNav) return;
+    if (currentNav) currentNav.removeAttribute('aria-current');
+    if (active) active.setAttribute('aria-current', 'true');
+    currentNav = active;
+  }
 
   function topbarState() {
     const y = window.scrollY;
     topbar.classList.toggle('is-solid', y > 24);
     const contactTop = contact.getBoundingClientRect().top;
-    sticky.classList.toggle('is-visible', y > window.innerHeight * 0.7 && contactTop > window.innerHeight * 0.6);
+    const show = y > window.innerHeight * 0.7 && contactTop > window.innerHeight * 0.6;
+    sticky.classList.toggle('is-visible', show);
+    // reserva sitio abajo para que el CTA fijo no se coma el pie
+    document.body.classList.toggle('has-sticky-cta', show);
+    navState();
   }
   topbarState();
 
@@ -44,16 +85,18 @@
   const counters = document.querySelectorAll('[data-count]');
   const DURATION = 1400; // misma duración para todos: distinta velocidad, mismo final
   function animateCounter(el) {
+    // el valor final ya está en un .sr-only; aquí solo se anima el span decorativo
+    const out = el.querySelector('[aria-hidden="true"]') || el;
     const target = parseFloat(el.dataset.target);
     const decimals = parseInt(el.dataset.decimals || '0', 10);
     const prefix = el.dataset.prefix || '';
-    if (reduceMotion) { el.textContent = prefix + target.toFixed(decimals).replace('.', ','); return; }
+    if (reduceMotion) { out.textContent = prefix + target.toFixed(decimals).replace('.', ','); return; }
     const start = performance.now();
     function step(now) {
       const t = Math.min(1, (now - start) / DURATION);
       const eased = 1 - Math.pow(1 - t, 3);
       const value = target * eased;
-      el.textContent = prefix + value.toFixed(decimals).replace('.', ',');
+      out.textContent = prefix + value.toFixed(decimals).replace('.', ',');
       if (t < 1) requestAnimationFrame(step);
     }
     requestAnimationFrame(step);
@@ -67,6 +110,97 @@
       }, { threshold: 0.6 });
       counters.forEach(el => cio.observe(el));
     }
+  }
+
+  /* ---------- Mapa: no se carga Google hasta que el usuario lo acepta ---------- */
+  const mapBtn = $('#map-consent');
+  if (mapBtn) {
+    mapBtn.addEventListener('click', () => {
+      const frame = document.createElement('iframe');
+      frame.src = mapBtn.dataset.mapSrc;
+      frame.title = mapBtn.dataset.mapTitle;
+      frame.loading = 'lazy';
+      frame.referrerPolicy = 'no-referrer-when-downgrade';
+      frame.allowFullscreen = true;
+      frame.setAttribute('width', '600');
+      frame.setAttribute('height', '420');
+      mapBtn.replaceWith(frame);
+    });
+  }
+
+  /* ---------- Formulario: validación en español y envío sin recargar ---------- */
+  const form = $('#form-reserva');
+  if (form) {
+    const status = $('#form-status');
+    const fields = [...form.elements].filter(el => el.name && el.name !== '_gotcha' && el.willValidate);
+
+    const messages = {
+      nombre: 'Dinos cómo te llamas.',
+      email: 'Necesitamos un email válido para contestarte.',
+      consentimiento: 'Marca la casilla para que podamos responderte.'
+    };
+
+    function errorFor(field) {
+      if (field.validity.valid) return '';
+      if (field.validity.valueMissing || field.validity.typeMismatch) {
+        return messages[field.name] || 'Revisa este campo.';
+      }
+      return 'Revisa este campo.';
+    }
+
+    function showError(field, msg) {
+      const slot = form.querySelector(`[data-error-for="${field.name}"]`);
+      if (slot) slot.textContent = msg;
+      field.setAttribute('aria-invalid', msg ? 'true' : 'false');
+      if (!msg) field.removeAttribute('aria-invalid');
+    }
+
+    fields.forEach(field => {
+      field.addEventListener('blur', () => showError(field, errorFor(field)));
+      field.addEventListener('input', () => { if (field.hasAttribute('aria-invalid')) showError(field, errorFor(field)); });
+    });
+
+    function setStatus(text, state) {
+      status.textContent = text;
+      if (state) status.dataset.state = state; else delete status.dataset.state;
+    }
+
+    form.addEventListener('submit', async e => {
+      e.preventDefault();
+      setStatus('', null);
+
+      let firstBad = null;
+      fields.forEach(field => {
+        const msg = errorFor(field);
+        showError(field, msg);
+        if (msg && !firstBad) firstBad = field;
+      });
+      if (firstBad) { firstBad.focus(); setStatus('Faltan datos por revisar.', 'error'); return; }
+
+      // Sin endpoint configurado: no se pierde el mensaje, se abre el correo
+      if (form.action.includes('TU_ID')) {
+        setStatus('El formulario aún no está conectado. Escríbenos a hola@jonaristugolf.es o por WhatsApp y te contestamos igual.', 'error');
+        return;
+      }
+
+      form.classList.add('is-sending');
+      setStatus('Enviando…', null);
+      try {
+        const res = await fetch(form.action, {
+          method: 'POST',
+          body: new FormData(form),
+          headers: { Accept: 'application/json' }
+        });
+        if (!res.ok) throw new Error(res.status);
+        form.reset();
+        fields.forEach(field => showError(field, ''));
+        setStatus('Recibido. Te contesto en menos de 24 horas para cerrar día y hora.', 'ok');
+      } catch (err) {
+        setStatus('No hemos podido enviarlo. Prueba por WhatsApp al 600 000 000 o escribe a hola@jonaristugolf.es.', 'error');
+      } finally {
+        form.classList.remove('is-sending');
+      }
+    });
   }
 
   /* ---------- La bola: del tee al hoyo ---------- */
@@ -213,10 +347,21 @@
   let rt;
   function rebuild() { clearTimeout(rt); rt = setTimeout(build, 120); }
 
+  // Reconstruir cuesta un getTotalLength() y 24 getPointAtLength(): solo si la
+  // geometría ha cambiado de verdad. El ResizeObserver saltaba en cada aparición.
+  let lastW = 0, lastH = 0;
+  function rebuildIfChanged() {
+    const w = document.documentElement.clientWidth;
+    const h = document.documentElement.scrollHeight;
+    if (Math.abs(w - lastW) < 1 && Math.abs(h - lastH) < 8) return;
+    lastW = w; lastH = h;
+    rebuild();
+  }
+
   window.addEventListener('scroll', onScroll, { passive: true });
   window.addEventListener('resize', rebuild);
   window.addEventListener('load', build);
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(rebuild);
-  if ('ResizeObserver' in window) new ResizeObserver(rebuild).observe(document.body);
+  if ('ResizeObserver' in window) new ResizeObserver(rebuildIfChanged).observe(document.documentElement);
   build();
 })();

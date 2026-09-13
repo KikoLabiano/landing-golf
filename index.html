@@ -22,17 +22,21 @@
   <meta property="og:image" content="https://www.jonaristugolf.es/og.jpg">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
+  <meta property="og:image:type" content="image/jpeg">
+  <meta property="og:image:alt" content="Menos golpes. Más golf. Clases particulares de golf con Jon Aristu en Pamplona.">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Clases de golf en Pamplona · Jon Aristu">
   <meta name="twitter:description" content="Menos golpes, más golf. Clases particulares de golf en Pamplona. Primera clase gratis.">
   <meta name="twitter:image" content="https://www.jonaristugolf.es/og.jpg">
+  <meta name="twitter:image:alt" content="Menos golpes. Más golf. Clases particulares de golf con Jon Aristu en Pamplona.">
 
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,700;1,9..144,400;1,9..144,600&family=Schibsted+Grotesk:ital,wght@0,400;0,500;0,700;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+  <!-- Tipografías autohospedadas: sin peticiones a terceros ni render bloqueado.
+       Se precargan los dos cortes que aparecen en la primera pantalla. -->
+  <link rel="preload" href="fonts/fraunces-400-700-normal-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/schibsted-grotesk-400-700-normal-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="styles.css">
 
   <!-- Datos estructurados -->
@@ -41,14 +45,25 @@
     "@context": "https://schema.org",
     "@graph": [
       {
+        "@type": "WebSite",
+        "@id": "https://www.jonaristugolf.es/#web",
+        "url": "https://www.jonaristugolf.es/",
+        "name": "Jon Aristu · Clases de golf en Pamplona",
+        "inLanguage": "es-ES",
+        "publisher": { "@id": "https://www.jonaristugolf.es/#negocio" }
+      },
+      {
         "@type": ["LocalBusiness", "SportsActivityLocation"],
         "@id": "https://www.jonaristugolf.es/#negocio",
         "name": "Jon Aristu · Clases de golf en Pamplona",
+        "description": "Clases particulares de golf en Pamplona y Navarra para todos los niveles, con entrenador titulado. Primera clase de prueba gratuita.",
         "image": "https://www.jonaristugolf.es/og.jpg",
+        "logo": "https://www.jonaristugolf.es/apple-touch-icon.png",
         "url": "https://www.jonaristugolf.es/",
         "telephone": "+34600000000",
         "email": "hola@jonaristugolf.es",
-        "priceRange": "0 € - 470 €",
+        "priceRange": "€€",
+        "currenciesAccepted": "EUR",
         "address": {
           "@type": "PostalAddress",
           "streetAddress": "Campo de prácticas, Ctra. de ejemplo km 3",
@@ -58,18 +73,155 @@
           "addressCountry": "ES"
         },
         "geo": { "@type": "GeoCoordinates", "latitude": 42.8125, "longitude": -1.6458 },
-        "areaServed": ["Pamplona", "Navarra", "Gipuzkoa", "La Rioja"],
+        "areaServed": [
+          { "@type": "City", "name": "Pamplona" },
+          { "@type": "AdministrativeArea", "name": "Navarra" },
+          { "@type": "AdministrativeArea", "name": "Gipuzkoa" },
+          { "@type": "AdministrativeArea", "name": "La Rioja" }
+        ],
         "openingHoursSpecification": [
           { "@type": "OpeningHoursSpecification", "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday"], "opens": "09:00", "closes": "20:00" },
           { "@type": "OpeningHoursSpecification", "dayOfWeek": "Saturday", "opens": "09:00", "closes": "14:00" }
         ],
         "founder": { "@id": "https://www.jonaristugolf.es/#jon" },
-        "makesOffer": [
-          { "@type": "Offer", "name": "Clase de prueba (30 min)", "price": "0", "priceCurrency": "EUR" },
-          { "@type": "Offer", "name": "Clase individual (60 min)", "price": "55", "priceCurrency": "EUR" },
-          { "@type": "Offer", "name": "Bono 5 clases", "price": "250", "priceCurrency": "EUR" },
-          { "@type": "Offer", "name": "Bono 10 clases", "price": "470", "priceCurrency": "EUR" },
-          { "@type": "Offer", "name": "Clase en campo, 9 hoyos", "price": "120", "priceCurrency": "EUR" }
+        "employee": { "@id": "https://www.jonaristugolf.es/#jon" },
+        "sameAs": ["https://www.instagram.com/jonaristugolf"],
+        "hasOfferCatalog": { "@id": "https://www.jonaristugolf.es/#catalogo" }
+      },
+      {
+        "@type": "OfferCatalog",
+        "@id": "https://www.jonaristugolf.es/#catalogo",
+        "name": "Clases y bonos",
+        "itemListElement": [
+          {
+            "@type": "Offer",
+            "name": "Clase de prueba",
+            "price": "0",
+            "priceCurrency": "EUR",
+            "url": "https://www.jonaristugolf.es/#contacto",
+            "availability": "https://schema.org/InStock",
+            "itemOffered": {
+              "@type": "Service",
+              "name": "Clase de prueba de golf (30 min)",
+              "description": "Primera clase gratuita de 30 minutos para conocernos y ver por dónde empezar.",
+              "serviceType": "Clase de golf",
+              "provider": { "@id": "https://www.jonaristugolf.es/#negocio" }
+            }
+          },
+          {
+            "@type": "Offer",
+            "name": "Clase individual",
+            "price": "55",
+            "priceCurrency": "EUR",
+            "url": "https://www.jonaristugolf.es/#clases",
+            "availability": "https://schema.org/InStock",
+            "itemOffered": { "@id": "https://www.jonaristugolf.es/#clase-individual" }
+          },
+          {
+            "@type": "Offer",
+            "name": "Bono 5 clases",
+            "price": "250",
+            "priceCurrency": "EUR",
+            "url": "https://www.jonaristugolf.es/#clases",
+            "availability": "https://schema.org/InStock",
+            "itemOffered": {
+              "@type": "Service",
+              "name": "Bono de 5 clases de golf",
+              "description": "Cinco clases individuales de 60 minutos para trabajar un cambio concreto.",
+              "serviceType": "Clase de golf",
+              "provider": { "@id": "https://www.jonaristugolf.es/#negocio" }
+            }
+          },
+          {
+            "@type": "Offer",
+            "name": "Bono 10 clases",
+            "price": "470",
+            "priceCurrency": "EUR",
+            "url": "https://www.jonaristugolf.es/#clases",
+            "availability": "https://schema.org/InStock",
+            "itemOffered": {
+              "@type": "Service",
+              "name": "Bono de 10 clases de golf",
+              "description": "Diez clases individuales de 60 minutos: de cero al campo, o de bogey a par.",
+              "serviceType": "Clase de golf",
+              "provider": { "@id": "https://www.jonaristugolf.es/#negocio" }
+            }
+          },
+          {
+            "@type": "Offer",
+            "name": "Clase en campo, 9 hoyos",
+            "price": "120",
+            "priceCurrency": "EUR",
+            "url": "https://www.jonaristugolf.es/#clases",
+            "availability": "https://schema.org/InStock",
+            "itemOffered": {
+              "@type": "Service",
+              "name": "Clase de golf en campo (9 hoyos)",
+              "description": "Dos horas y media jugando nueve hoyos y tomando decisiones de juego reales.",
+              "serviceType": "Clase de golf",
+              "provider": { "@id": "https://www.jonaristugolf.es/#negocio" }
+            }
+          },
+          {
+            "@type": "Offer",
+            "name": "Grupo de 2 a 4 personas",
+            "price": "30",
+            "priceCurrency": "EUR",
+            "url": "https://www.jonaristugolf.es/#clases",
+            "availability": "https://schema.org/InStock",
+            "itemOffered": {
+              "@type": "Service",
+              "name": "Clase de golf en grupo reducido (90 min)",
+              "description": "Clase de 90 minutos para grupos de dos a cuatro personas. Precio por persona.",
+              "serviceType": "Clase de golf",
+              "provider": { "@id": "https://www.jonaristugolf.es/#negocio" }
+            }
+          },
+          {
+            "@type": "Offer",
+            "name": "Junior, de 8 a 16 años",
+            "price": "35",
+            "priceCurrency": "EUR",
+            "url": "https://www.jonaristugolf.es/#clases",
+            "availability": "https://schema.org/InStock",
+            "itemOffered": {
+              "@type": "Service",
+              "name": "Clase de golf junior (45 min)",
+              "description": "Clase de 45 minutos para niñas y niños de 8 a 16 años, con juegos y sin sermones.",
+              "serviceType": "Clase de golf",
+              "provider": { "@id": "https://www.jonaristugolf.es/#negocio" }
+            }
+          }
+        ]
+      },
+      {
+        "@type": "Service",
+        "@id": "https://www.jonaristugolf.es/#clase-individual",
+        "name": "Clase individual de golf (60 min)",
+        "description": "Clase particular de 60 minutos: un objetivo, un ejercicio y vídeo del swing para practicar en casa.",
+        "serviceType": "Clase de golf",
+        "areaServed": { "@type": "City", "name": "Pamplona" },
+        "provider": { "@id": "https://www.jonaristugolf.es/#negocio" },
+        "offers": { "@type": "Offer", "price": "55", "priceCurrency": "EUR", "availability": "https://schema.org/InStock" },
+        "review": [
+          {
+            "@type": "Review",
+            "author": { "@type": "Person", "name": "Maite" },
+            "reviewRating": { "@type": "Rating", "ratingValue": "5", "bestRating": "5" },
+            "reviewBody": "Llevaba tres años atascada en 28. Jon me quitó el slice en cuatro clases y me obligó a dejar de pegar drivers en el hoyo 7. Bajé a 19 antes de Navidad."
+          },
+          {
+            "@type": "Review",
+            "author": { "@type": "Person", "name": "Iñigo" },
+            "reviewRating": { "@type": "Rating", "ratingValue": "5", "bestRating": "5" },
+            "reviewBody": "Empecé sin haber tocado un palo. En la clase diez ya jugaba nueve hoyos sin perder bolas. Bueno, sin perder muchas."
+          },
+          {
+            "@type": "Review",
+            "author": { "@type": "Person", "name": "Carlos" },
+            "reviewRating": { "@type": "Rating", "ratingValue": "5", "bestRating": "5" },
+            "reviewBody": "Me grabó, me enseñó dos cosas, y me prohibió pensar en la tercera. Es la primera vez que un entrenador me quita cosas en lugar de añadir."
+          }
         ]
       },
       {
@@ -77,17 +229,19 @@
         "@id": "https://www.jonaristugolf.es/#jon",
         "name": "Jon Aristu",
         "jobTitle": "Entrenador de golf",
+        "knowsAbout": ["Golf", "Técnica de swing", "Juego corto", "Enseñanza deportiva"],
         "worksFor": { "@id": "https://www.jonaristugolf.es/#negocio" },
         "sameAs": ["https://www.instagram.com/jonaristugolf"]
       },
       {
         "@type": "FAQPage",
+        "@id": "https://www.jonaristugolf.es/#faq",
         "mainEntity": [
-          { "@type": "Question", "name": "¿Necesito tener palos propios?", "acceptedAnswer": { "@type": "Answer", "text": "No. Para las primeras clases te dejo un juego de palos ajustado a tu altura. Cuando toque comprar, te ayudo a elegir sin que te vendan lo que no necesitas." } },
+          { "@type": "Question", "name": "¿Necesito tener palos propios?", "acceptedAnswer": { "@type": "Answer", "text": "No. Para las primeras clases te dejo un juego ajustado a tu altura. Cuando toque comprar, te ayudo a elegir sin que te vendan lo que no necesitas." } },
           { "@type": "Question", "name": "Nunca he jugado al golf. ¿Puedo empezar contigo?", "acceptedAnswer": { "@type": "Answer", "text": "Sí. La mitad de mis alumnos llegan sin haber tocado un palo. En la primera clase golpeas bolas, no escuchas teoría." } },
-          { "@type": "Question", "name": "¿Cuántas clases necesito?", "acceptedAnswer": { "@type": "Answer", "text": "Depende de tu punto de partida y de cuánto practiques entre clases. Un principiante suele estar listo para salir al campo en 8 o 10 clases. Un jugador con hándicap suele notar cambio en 3 o 4." } },
+          { "@type": "Question", "name": "¿Cuántas clases necesito?", "acceptedAnswer": { "@type": "Answer", "text": "Depende de tu punto de partida y de cuánto practiques entre clases. Un principiante suele estar listo para salir al campo en 8 o 10 clases. Un jugador con hándicap suele notar el cambio en 3 o 4." } },
           { "@type": "Question", "name": "¿Das clases a niños?", "acceptedAnswer": { "@type": "Answer", "text": "Sí, a partir de 8 años. Clases de 45 minutos, con juegos y sin sermones." } },
-          { "@type": "Question", "name": "¿Qué pasa si llueve?", "acceptedAnswer": { "@type": "Answer", "text": "El campo de prácticas tiene puestos cubiertos. Si el tiempo es impracticable, movemos la clase sin coste." } }
+          { "@type": "Question", "name": "¿Qué pasa si llueve?", "acceptedAnswer": { "@type": "Answer", "text": "El campo tiene puestos cubiertos. Si el tiempo es impracticable, movemos la clase sin coste." } }
         ]
       }
     ]
@@ -141,15 +295,15 @@
         <div class="hero__copy">
           <p class="eyebrow"><span class="tee-dot"></span> Tee del 1 · Pamplona, Navarra</p>
           <h1>Menos golpes.<br><em>Más golf.</em></h1>
-          <p class="lede">Clases particulares de golf en Pamplona para gente que quiere jugar mejor, no coleccionar consejos. Un cambio cada vez, medido, hasta que la tarjeta lo nota.</p>
+          <p class="lede"><strong>Clases particulares de golf en Pamplona</strong> para gente que quiere jugar mejor, no coleccionar consejos. Un cambio cada vez, medido, hasta que la tarjeta lo nota.</p>
           <div class="hero__cta">
             <a class="btn" href="#contacto">Reservar clase de prueba</a>
             <a class="link-arrow" href="#metodo">Cómo trabajo</a>
           </div>
           <dl class="stats" id="stats">
-            <div><dt>Alumnos</dt><dd data-count data-target="300" data-prefix="+">+0</dd></div>
-            <div><dt>Años enseñando</dt><dd data-count data-target="12">0</dd></div>
-            <div><dt>Bajada media de hcp</dt><dd data-count data-target="6.4" data-decimals="1">0,0</dd></div>
+            <div><dt>Alumnos</dt><dd data-count data-target="300" data-prefix="+"><span aria-hidden="true">+0</span><span class="sr-only">Más de 300</span></dd></div>
+            <div><dt>Años enseñando</dt><dd data-count data-target="12"><span aria-hidden="true">0</span><span class="sr-only">12</span></dd></div>
+            <div><dt>Bajada media de hcp</dt><dd data-count data-target="6.4" data-decimals="1"><span aria-hidden="true">0,0</span><span class="sr-only">6,4</span></dd></div>
           </dl>
         </div>
 
@@ -352,7 +506,14 @@
               <a class="link-arrow" href="https://maps.google.com/?q=Pamplona,Navarra" target="_blank" rel="noopener">Abrir en Google Maps</a>
             </div>
             <div class="where__map">
-              <iframe title="Mapa del campo de prácticas en Pamplona" src="https://www.google.com/maps?q=Pamplona,Navarra&z=12&output=embed" width="600" height="420" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
+              <!-- El iframe de Google Maps carga cookies de terceros: no se inserta hasta que el usuario lo acepta -->
+              <button type="button" class="map-consent" id="map-consent"
+                      data-map-src="https://www.google.com/maps?q=Pamplona,Navarra&amp;z=12&amp;output=embed"
+                      data-map-title="Mapa del campo de prácticas en Pamplona">
+                <span class="map-consent__title">Mapa</span>
+                <span class="map-consent__text">Al cargar el mapa, Google puede instalar cookies en tu navegador.</span>
+                <span class="map-consent__btn">Cargar el mapa</span>
+              </button>
             </div>
           </div>
         </div>
@@ -404,19 +565,25 @@
           <p class="lede">Treinta minutos, gratis, sin compromiso. Te contesto en menos de 24 horas.</p>
 
           <div class="contact">
-            <form class="form" action="https://formspree.io/f/TU_ID" method="POST" novalidate>
+            <form class="form" id="form-reserva" action="https://formspree.io/f/TU_ID" method="POST" novalidate>
               <div class="form__row">
                 <label for="nombre">Nombre</label>
-                <input id="nombre" name="nombre" type="text" autocomplete="name" required>
+                <input id="nombre" name="nombre" type="text" autocomplete="name" required
+                       aria-describedby="err-nombre">
+                <span class="field-error" id="err-nombre" data-error-for="nombre"></span>
               </div>
               <div class="form__row form__row--2">
                 <div>
                   <label for="email">Email</label>
-                  <input id="email" name="email" type="email" autocomplete="email" required>
+                  <input id="email" name="email" type="email" autocomplete="email" required
+                         aria-describedby="err-email">
+                  <span class="field-error" id="err-email" data-error-for="email"></span>
                 </div>
                 <div>
                   <label for="telefono">Teléfono</label>
-                  <input id="telefono" name="telefono" type="tel" autocomplete="tel" inputmode="tel">
+                  <input id="telefono" name="telefono" type="tel" autocomplete="tel" inputmode="tel"
+                         aria-describedby="err-telefono">
+                  <span class="field-error" id="err-telefono" data-error-for="telefono"></span>
                 </div>
               </div>
               <div class="form__row">
@@ -432,9 +599,19 @@
                 <label for="mensaje">¿Qué te está costando golpes?</label>
                 <textarea id="mensaje" name="mensaje" rows="4" placeholder="Slice con el driver, mis putts cortos, mi paciencia…"></textarea>
               </div>
+
+              <!-- Consentimiento expreso: exigido por el RGPD, no vale darlo por hecho -->
+              <div class="form__consent">
+                <input id="consentimiento" name="consentimiento" type="checkbox" value="si" required
+                       aria-describedby="err-consentimiento">
+                <label for="consentimiento">He leído y acepto la <a href="privacidad.html">política de privacidad</a>. Acepto que Jon Aristu trate mis datos para responder a esta solicitud.</label>
+              </div>
+              <span class="field-error" id="err-consentimiento" data-error-for="consentimiento"></span>
+
               <input type="text" name="_gotcha" class="sr-only" tabindex="-1" autocomplete="off" aria-hidden="true">
               <button class="btn btn--light" type="submit">Enviar y reservar</button>
-              <p class="form__legal">Al enviar aceptas la <a href="privacidad.html">política de privacidad</a>. Solo uso tus datos para responderte.</p>
+              <p class="form__status" id="form-status" role="status" aria-live="polite"></p>
+              <p class="form__legal">Responsable: Jon Aristu. Finalidad: responderte y gestionar tu clase. Tus datos no se ceden a terceros. Puedes ejercer tus derechos escribiendo a <a href="mailto:hola@jonaristugolf.es">hola@jonaristugolf.es</a>. Más detalle en la <a href="privacidad.html">política de privacidad</a>.</p>
             </form>
 
             <aside class="direct">
